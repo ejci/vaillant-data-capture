@@ -1,0 +1,3 @@
+myPyllant>=0.6.0
+influxdb-client>=1.36.0
+python-dotenv>=1.0.0
