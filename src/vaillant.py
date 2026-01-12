@@ -11,6 +11,10 @@ class VaillantClient:
         logging.getLogger("myPyllant").setLevel(logging.WARNING)
 
     async def initialize(self):
+        # Close existing session if it exists to prevent leakage
+        if self.api and hasattr(self.api, "aiohttp_session") and self.api.aiohttp_session:
+            await self.api.aiohttp_session.close()
+
         logger.info(f"Initializing Vaillant API for user {Config.VAILLANT_EMAIL}")
         try:
             self.api = MyPyllantAPI(
@@ -29,12 +33,24 @@ class VaillantClient:
         if not self.api:
             await self.initialize()
         
-        async for system in self.api.get_systems(include_diagnostic_trouble_codes=True):
-            yield system
+        # Retry logic for expired tokens (401)
+        max_retries = 1
+        for attempt in range(max_retries + 1):
+            try:
+                async for system in self.api.get_systems(include_diagnostic_trouble_codes=True):
+                    yield system
+                break # Success, exit loop
+            except Exception as e:
+                # Check for 401 Unauthorized in the exception message
+                is_unauthorized = "401" in str(e) or "Unauthorized" in str(e)
+                
+                if is_unauthorized and attempt < max_retries:
+                    logger.warning(f"Received 401 Unauthorized (Attempt {attempt + 1}). Re-authenticating...")
+                    await self.initialize()
+                else:
+                    # Not a 401 or max retries exceeded
+                    raise e
 
     async def close(self):
-         # myPyllant uses aiohttp session managed internally, usually needs closing if exposed, 
-         # but check library. It often closes on context exit or explicit close if available.
-         # Assuming clean shutdown isn't strictly enforced by specific method in current version,
-         # but standard is good practice.
-         pass
+        if self.api and hasattr(self.api, "aiohttp_session") and self.api.aiohttp_session:
+            await self.api.aiohttp_session.close()
