@@ -85,7 +85,7 @@ The application writes the following measurements to InfluxDB:
 
 All logs are emitted as newline-delimited JSON to stdout:
 
-```
+```json
 {"level": 30, "time": "2026-02-21T14:51:18.985Z", "service": "vaillant-data-capture", "msg": "Polling data..."}
 {"level": 50, "time": "2026-02-21T14:51:18.987Z", "service": "vaillant-data-capture", "msg": "Error during polling"}
 ```
