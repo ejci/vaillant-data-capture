@@ -11,6 +11,7 @@ class Config:
     VAILLANT_PASSWORD = os.getenv("VAILLANT_PASSWORD")
     VAILLANT_POLL_INTERVAL = int(os.getenv("VAILLANT_POLL_INTERVAL", "600000")) # 10 mins
     VAILLANT_DRYRUN = os.getenv("VAILLANT_DRYRUN", "false").lower() == "true"
+    VAILLANT_LOG_LEVEL = os.getenv("VAILLANT_LOG_LEVEL", "info")
 
     # InfluxDB
     INFLUX_URL = os.getenv("INFLUX_URL", "http://localhost:8086")

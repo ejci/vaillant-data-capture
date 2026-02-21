@@ -9,6 +9,7 @@ A Python-based application that captures telemetry data from Vaillant heating sy
 - **Dockerized**: specific `Dockerfile` and `compose.yaml` for easy deployment.
 - **Dry Run Mode**: Test data collection without writing to the database.
 - **Resilient**: Handles API errors and connection issues gracefully.
+- **Loki-ready Logging**: Emits newline-delimited JSON to stdout for easy ingestion by Promtail/Alloy.
 
 ## Prerequisites
 
@@ -31,7 +32,7 @@ A Python-based application that captures telemetry data from Vaillant heating sy
     ```
 
     **Required Variables:**
-    - `VAILLANT_USER`: Your Vaillant username/email.
+    - `VAILLANT_EMAIL`: Your Vaillant username/email.
     - `VAILLANT_PASSWORD`: Your Vaillant password.
     - `INFLUX_URL`: URL of your InfluxDB instance (e.g., `http://localhost:8086`).
     - `INFLUX_TOKEN`: InfluxDB API token.
@@ -43,6 +44,7 @@ A Python-based application that captures telemetry data from Vaillant heating sy
     - `VAILLANT_COUNTRY`: Country code (default: `netherlands`).
     - `VAILLANT_POLL_INTERVAL`: Time between polls in milliseconds (default: `600000` = 10 minutes).
     - `VAILLANT_DRYRUN`: Set to `true` to print data to console instead of writing to InfluxDB.
+    - `VAILLANT_LOG_LEVEL`: Log verbosity — `debug`, `info`, `warning`, `error` (default: `info`).
 
 3.  **Run with Docker Compose**
     ```bash
@@ -78,6 +80,17 @@ The application writes the following measurements to InfluxDB:
 *   **Tags**: `dhw_index`, `system_id`
 *   **Fields**:
     *   `current_dhw_temperature`: Current hot water tank temperature.
+
+## Logging & Loki
+
+All logs are emitted as newline-delimited JSON to stdout:
+
+```
+{"level": 30, "time": "2026-02-21T14:51:18.985Z", "service": "vaillant-data-capture", "msg": "Polling data..."}
+{"level": 50, "time": "2026-02-21T14:51:18.987Z", "service": "vaillant-data-capture", "msg": "Error during polling"}
+```
+
+Each line carries `"service": "vaillant-data-capture"`, making it straightforward to create Loki label filters in Promtail/Alloy.
 
 ## Development
 
