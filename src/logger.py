@@ -15,11 +15,12 @@ PINO_LEVELS = {
 }
 
 class LokiJsonFormatter(jsonlogger.JsonFormatter):
-    """Emits newline-delimited JSON matching the enphase-data-capture Pino format:
+    """
+    Emits newline-delimited JSON matching the enphase-data-capture Pino format:
     {"level": 30, "time": "2026-02-21T14:51:18.985Z", "service": "vaillant-data-capture", "msg": "..."}
     """
 
-    def add_fields(self, log_record, record, message_dict):
+    def add_fields(self, log_record: dict, record: logging.LogRecord, message_dict: dict) -> None:
         super().add_fields(log_record, record, message_dict)
 
         # Pino-style numeric level
@@ -45,6 +46,10 @@ class LokiJsonFormatter(jsonlogger.JsonFormatter):
 
 
 def setup_logger(name: str = "vaillant_capture") -> logging.Logger:
+    """
+    Sets up and configures the standard Python logger to output JSON to stdout.
+    The log level is controlled by the VAILLANT_LOG_LEVEL environment variable.
+    """
     log_level_name = os.getenv("VAILLANT_LOG_LEVEL", "info").upper()
     log_level = getattr(logging, log_level_name, logging.INFO)
 

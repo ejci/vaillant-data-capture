@@ -1,16 +1,24 @@
 import logging
+import typing
 from myPyllant.api import MyPyllantAPI
 from myPyllant.models import System, Device
 from src.config import Config
 from src.logger import logger
 
 class VaillantClient:
+    """
+    Wrapper around the MyPyllantAPI to extract system data from Vaillant.
+    """
     def __init__(self):
-        self.api = None
+        self.api: typing.Optional[MyPyllantAPI] = None
         # Suppress myPyllant debug logs if needed as they can be verbose
         logging.getLogger("myPyllant").setLevel(logging.WARNING)
 
-    async def initialize(self):
+    async def initialize(self) -> None:
+        """
+        Initializes the API wrapper and logs in using the credentials 
+        provided in the environment variables.
+        """
         # Close existing session if it exists to prevent leakage
         if self.api and hasattr(self.api, "aiohttp_session") and self.api.aiohttp_session:
             await self.api.aiohttp_session.close()
@@ -29,7 +37,12 @@ class VaillantClient:
              logger.error(f"Failed to login to Vaillant: {e}")
              raise
 
-    async def get_systems(self):
+    async def get_systems(self) -> typing.AsyncGenerator[System, None]:
+        """
+        Yields `System` objects containing the current state of Vaillant devices.
+        If a 401 Unauthorized error is encountered, it automatically handles
+        re-authentication and retries once.
+        """
         if not self.api:
             await self.initialize()
         
@@ -37,6 +50,7 @@ class VaillantClient:
         max_retries = 1
         for attempt in range(max_retries + 1):
             try:
+                # We expect self.api to be non-None here because of initialize()
                 async for system in self.api.get_systems(include_diagnostic_trouble_codes=True):
                     yield system
                 break # Success, exit loop
@@ -51,6 +65,7 @@ class VaillantClient:
                     # Not a 401 or max retries exceeded
                     raise e
 
-    async def close(self):
+    async def close(self) -> None:
+        """Closes the underlying HTTP session to prevent connection leaks."""
         if self.api and hasattr(self.api, "aiohttp_session") and self.api.aiohttp_session:
             await self.api.aiohttp_session.close()
