@@ -59,8 +59,13 @@ class VaillantClient:
                 is_unauthorized = "401" in str(e) or "Unauthorized" in str(e)
                 
                 if is_unauthorized and attempt < max_retries:
-                    logger.warning(f"Received 401 Unauthorized (Attempt {attempt + 1}). Re-authenticating...")
-                    await self.initialize()
+                    logger.warning(f"Received 401 Unauthorized (Attempt {attempt + 1}). Refreshing token...")
+                    try:
+                        await self.api.refresh_token()
+                        logger.info("Token refreshed successfully")
+                    except Exception as refresh_err:
+                        logger.warning(f"Token refresh failed: {refresh_err}. Falling back to full re-authentication.")
+                        await self.initialize()
                 else:
                     # Not a 401 or max retries exceeded
                     raise e
