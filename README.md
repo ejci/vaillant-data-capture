@@ -109,3 +109,24 @@ To run locally without Docker for development:
     ```bash
     python main.py
     ```
+
+## Testing
+
+The project uses `pytest` and `pytest-asyncio` for comprehensive asynchronous testing. 
+
+To run the unit tests natively (includes coverage tracking via `pytest-cov`):
+
+1. **Activate the virtual environment**:
+    ```bash
+    source venv/bin/activate
+    ```
+2. **Install development requirements**:
+    ```bash
+    pip install -r requirements-dev.txt
+    ```
+3. **Execute the test suite**:
+    ```bash
+    PYTHONPATH=$(pwd) pytest tests/ -v --cov=src --cov=main
+    ```
+
+The test suite heavily mocks the `MyPyllantAPI` bindings and the `InfluxDBClientAsync`, meaning you do not need real credentials or a running InfluxDB instance to validate the parsing and authentication logics successfully.
