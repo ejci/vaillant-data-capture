@@ -2,7 +2,10 @@ import logging
 import os
 import sys
 from datetime import datetime, timezone
-from pythonjsonlogger import jsonlogger
+try:
+    from pythonjsonlogger.json import JsonFormatter
+except ImportError:
+    from pythonjsonlogger.jsonlogger import JsonFormatter
 
 # Map Python log level names to Pino-style numeric levels
 PINO_LEVELS = {
@@ -14,7 +17,7 @@ PINO_LEVELS = {
     "CRITICAL": 60,
 }
 
-class LokiJsonFormatter(jsonlogger.JsonFormatter):
+class LokiJsonFormatter(JsonFormatter):
     """
     Emits newline-delimited JSON matching the enphase-data-capture Pino format:
     {"level": 30, "time": "2026-02-21T14:51:18.985Z", "service": "vaillant-data-capture", "msg": "..."}

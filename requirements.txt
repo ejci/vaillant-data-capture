@@ -1,4 +1,4 @@
-myPyllant>=0.6.0
-influxdb-client>=1.36.0
-python-dotenv>=1.0.0
-python-json-logger>=2.0.7
+myPyllant>=0.9.18
+influxdb-client>=1.50.0
+python-dotenv>=1.2.4
+python-json-logger>=4.2.0
